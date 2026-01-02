@@ -1,0 +1,9 @@
+{
+  "settings.title": "Settings",
+  "settings.name": "Name",
+  "settings.country": "Country",
+  "settings.city": "City",
+  "settings.language": "Language",
+  "settings.dark_mode": "Dark mode",
+  "settings.calculator": "Cubic Calculator"
+}

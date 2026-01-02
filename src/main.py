@@ -1,5 +1,6 @@
 import logging
 import flet as ft
+from i18n.translator import Translator
 from ui.layout import base_layout
 from views.home import home_view
 from views.pools import pools_view
@@ -14,7 +15,8 @@ logger.setLevel(logging.INFO)
 def main(page: ft.Page):
     page.title = "Smart Pool"
     page.theme_mode = ft.ThemeMode.SYSTEM
-    page.bgcolor = "#4C4D4F"
+    current_language = "pt"
+    translator = Translator(lang=current_language)
 
     print("Platform:", page.platform)
 
@@ -37,24 +39,41 @@ def main(page: ft.Page):
         "cubic_calculator": cubic_calculator_view,
     }
 
+    def t(key):
+        return translator.t(key)
+
+    def set_language(lang, view_key="home"):
+        translator.load(lang)
+        nonlocal current_language
+        current_language = lang
+        navigate(view_key)
+
+    def set_theme_mode(is_dark):
+        page.theme_mode = ft.ThemeMode.DARK if is_dark else ft.ThemeMode.LIGHT
+        page.bgcolor = "#4C4D4F" if is_dark else "#83CEF3"
+        page.update()
+
     def navigate(view_key):
         view_fn = views[view_key]
 
         if view_key in ['pools']:
-            content.content = base_layout(view_fn(navigate))
+            content.content = base_layout(view_fn(navigate, t))
+        elif view_key in ['settings']:
+            content.content = base_layout(view_fn(navigate, 
+                                                  set_theme_mode, 
+                                                  page.theme_mode,
+                                                  t,
+                                                  set_language,
+                                                  current_language))
         else:
-            content.content = base_layout(view_fn())
+            content.content = base_layout(view_fn(t))
         page.update()
 
 
     def on_navigation_change(e):
         index = e.control.selected_index
         view_key = [k for k in views.keys()][index]
-        logger.debug(f"Navigation changed to index: {index}: {view_key}")
 
-        #import pdb; pdb.set_trace()
-        #content.content = base_layout(views[index]())
-        #content.content = base_layout(views[view_key]())
         navigate(view_key)
         ft.NavigationBar.selected_index = index
         page.update()
@@ -65,8 +84,9 @@ def main(page: ft.Page):
     # Menu inferior
     navigation = ft.NavigationBar(
         selected_index=0,
+        height=50,
         destinations=[
-            ft.NavigationBarDestination(icon=ft.Icons.HOME),
+            ft.NavigationBarDestination(icon=ft.Icons.HOME, adaptive=True),
             ft.NavigationBarDestination(icon=ft.Icons.POOL),
             ft.NavigationBarDestination(icon=ft.Icons.AUTO_AWESOME),
             ft.NavigationBarDestination(icon=ft.Icons.HISTORY),
@@ -77,11 +97,12 @@ def main(page: ft.Page):
     # Layout final
     page.add(
         ft.Column(
+            spacing=0,
+            expand=True,
             controls=[
                 content,
                 navigation
             ],
-            expand=True
         )
     )
 

@@ -1,7 +1,7 @@
 import flet as ft
 
 
-def pools_view(navigate):
+def pools_view(navigate, t):
     return ft.Container(
         content=ft.Column(controls=[
             ft.Text("Pools", size=24, weight=ft.FontWeight.BOLD),
