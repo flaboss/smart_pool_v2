@@ -5,5 +5,13 @@
   "settings.city": "City",
   "settings.language": "Language",
   "settings.dark_mode": "Dark mode",
-  "settings.calculator": "Cubic Calculator"
+  "settings.calculator": "Cubic Calculator",
+
+  "home.welcome": "Welcome to Smart Pool",
+
+  "pools.title": "Pools",
+  
+  "analysis.title": "Water Analysis",
+
+  "history.title": "History"
 }

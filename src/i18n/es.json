@@ -5,5 +5,13 @@
   "settings.city": "Ciudad",
   "settings.language": "Idioma",
   "settings.dark_mode": "Modo oscuro",
-  "settings.calculator": "Calculadora"
+  "settings.calculator": "Calculadora",
+
+  "home.welcome": "Bienvenido a Smart Pool",
+
+  "pools.title": "Piscinas",
+  
+  "analysis.title": "Análisis de Agua",
+
+  "history.title": "Historial"
 }
