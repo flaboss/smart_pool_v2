@@ -1,8 +1,11 @@
 {
   "settings.title": "Settings",
   "settings.name": "Name",
+  "settings.name_hint": "Enter your name",
   "settings.country": "Country",
+  "settings.country_hint": "Enter your country",
   "settings.city": "City",
+  "settings.city_hint": "Enter your city",
   "settings.language": "Language",
   "settings.dark_mode": "Dark mode",
   "settings.calculator": "Cubic Calculator",

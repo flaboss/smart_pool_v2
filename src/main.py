@@ -12,6 +12,7 @@ from views.cubic_calculator import cubic_calculator_view
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 def main(page: ft.Page):
     page.title = "Smart Pool"
     page.theme_mode = ft.ThemeMode.SYSTEM
@@ -20,14 +21,12 @@ def main(page: ft.Page):
 
     print("Platform:", page.platform)
 
-    if page.platform in (
-        ft.PagePlatform.MACOS,
-    ):
+    if page.platform in (ft.PagePlatform.MACOS,):
         print("Setting window size for desktop development")
         page.window.width = 390
         page.window.height = 844
         page.window.resizable = False
-    
+
     content = ft.Container(expand=True)
 
     views = {
@@ -56,19 +55,22 @@ def main(page: ft.Page):
     def navigate(view_key):
         view_fn = views[view_key]
 
-        if view_key in ['pools']:
+        if view_key in ["pools"]:
             content.content = base_layout(view_fn(navigate, t))
-        elif view_key in ['settings']:
-            content.content = base_layout(view_fn(navigate, 
-                                                  set_theme_mode, 
-                                                  page.theme_mode,
-                                                  t,
-                                                  set_language,
-                                                  current_language))
+        elif view_key in ["settings"]:
+            content.content = base_layout(
+                view_fn(
+                    navigate,
+                    set_theme_mode,
+                    page.theme_mode,
+                    t,
+                    set_language,
+                    current_language,
+                )
+            )
         else:
             content.content = base_layout(view_fn(t))
         page.update()
-
 
     def on_navigation_change(e):
         index = e.control.selected_index
@@ -99,12 +101,10 @@ def main(page: ft.Page):
         ft.Column(
             spacing=0,
             expand=True,
-            controls=[
-                content,
-                navigation
-            ],
+            controls=[content, navigation],
         )
     )
+
 
 if __name__ == "__main__":
     ft.run(main)

@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+
 class Translator:
     def __init__(self, lang="pt"):
         self.lang = lang

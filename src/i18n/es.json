@@ -1,8 +1,11 @@
 {
   "settings.title": "Configuración",
   "settings.name": "Nombre",
+  "settings.name_hint": "Ingresa tu nombre",
   "settings.country": "País",
+  "settings.country_hint": "Ingresa tu país",
   "settings.city": "Ciudad",
+  "settings.city_hint": "Ingresa tu ciudad",
   "settings.language": "Idioma",
   "settings.dark_mode": "Modo oscuro",
   "settings.calculator": "Calculadora",

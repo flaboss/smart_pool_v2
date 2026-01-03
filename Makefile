@@ -1,7 +1,7 @@
 VENV_DIR = .venv
 PYTHON = $(VENV_DIR)/bin/python
 
-.PHONY: venv run web lint
+.PHONY: venv run web lint clean lint format build_apk install_apk help
  
 help: ## Displays the available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -17,7 +17,7 @@ run:
 web:
 	. $(VENV_DIR)/bin/activate && flet run --web main.py
 
-clean: ## RRemoves temp files
+clean: ## Removes temp files
 	## rm -rf $(VENV)
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.py[co]" -delete
