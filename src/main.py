@@ -25,11 +25,13 @@ def main(page: ft.Page):
 
     print("Platform:", page.platform)
 
-    # if page.platform in (ft.PagePlatform.MACOS,):
-    #     print("Setting window size for desktop development")
-    #     page.window.width = 390
-    #     page.window.height = 844
-    #     page.window.resizable = False
+    # Set window size for desktop development to simulate mobile view
+    if page.platform in (ft.PagePlatform.MACOS, ft.PagePlatform.WINDOWS, ft.PagePlatform.LINUX):
+        print("Setting window size for desktop development")
+        page.window.width = 390
+        page.window.height = 844
+        page.window.resizable = False
+        page.window.center()
 
     content = ft.Container(expand=True)
     navigation = ft.Ref[ft.NavigationBar]()

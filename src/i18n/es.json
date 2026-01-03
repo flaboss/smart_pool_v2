@@ -29,5 +29,22 @@
   "calculator.depth": "Profundidad",
   "calculator.error_invalid_input": "Por favor ingrese valores numéricos válidos.",
   "calculator.volume": "Volumen",
-  "calculator.copied": "Volumen copiado al portapapeles"
+  "calculator.copied": "Volumen copiado al portapapeles",
+
+  "login.title": "Bienvenido",
+  "login.subtitle": "Inicia sesión para continuar",
+  "login.email": "Correo electrónico",
+  "login.email_hint": "Ingresa tu correo electrónico",
+  "login.password": "Contraseña",
+  "login.password_hint": "Ingresa tu contraseña",
+  "login.confirm_password": "Confirmar Contraseña",
+  "login.confirm_password_hint": "Confirma tu contraseña",
+  "login.login": "Iniciar Sesión",
+  "login.signup": "Registrarse",
+  "login.create_account": "Crear Cuenta",
+  "login.have_account": "¿Ya tienes una cuenta?",
+  "login.no_account": "¿No tienes una cuenta?",
+  "login.error_email_required": "El correo electrónico es obligatorio",
+  "login.error_password_length": "La contraseña debe tener al menos 6 caracteres",
+  "login.error_password_mismatch": "Las contraseñas no coinciden"
 }

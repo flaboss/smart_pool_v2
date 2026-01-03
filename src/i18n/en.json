@@ -29,5 +29,22 @@
   "calculator.depth": "Depth",
   "calculator.error_invalid_input": "Please enter valid numeric values.",
   "calculator.volume": "Volume",
-  "calculator.copied": "Volume copied to clipboard"
+  "calculator.copied": "Volume copied to clipboard",
+
+  "login.title": "Welcome",
+  "login.subtitle": "Sign in to continue",
+  "login.email": "Email",
+  "login.email_hint": "Enter your email",
+  "login.password": "Password",
+  "login.password_hint": "Enter your password",
+  "login.confirm_password": "Confirm Password",
+  "login.confirm_password_hint": "Confirm your password",
+  "login.login": "Login",
+  "login.signup": "Sign Up",
+  "login.create_account": "Create Account",
+  "login.have_account": "Already have an account?",
+  "login.no_account": "Don't have an account?",
+  "login.error_email_required": "Email is required",
+  "login.error_password_length": "Password must be at least 6 characters",
+  "login.error_password_mismatch": "Passwords do not match"
 }
