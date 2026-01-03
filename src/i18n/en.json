@@ -9,6 +9,7 @@
   "settings.language": "Language",
   "settings.dark_mode": "Dark mode",
   "settings.calculator": "Cubic Calculator",
+  "settings.units": "Units",
 
   "home.welcome": "Welcome to Smart Pool",
 
@@ -16,5 +17,17 @@
   
   "analysis.title": "Water Analysis",
 
-  "history.title": "History"
+  "history.title": "History",
+
+  "calculator.shape": "Pool Shape",
+  "calculator.compute": "Compute",
+  "calculator.shape.round": "Round",
+  "calculator.shape.rectangle": "Rectangle",
+  "calculator.radius": "Radius",
+  "calculator.width": "Width",
+  "calculator.length": "Length",
+  "calculator.depth": "Depth",
+  "calculator.error_invalid_input": "Please enter valid numeric values.",
+  "calculator.volume": "Volume",
+  "calculator.copied": "Volume copied to clipboard"
 }

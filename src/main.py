@@ -17,15 +17,16 @@ def main(page: ft.Page):
     page.title = "Smart Pool"
     page.theme_mode = ft.ThemeMode.SYSTEM
     current_language = "pt"
+    current_unit = "m"
     translator = Translator(lang=current_language)
 
     print("Platform:", page.platform)
 
-    if page.platform in (ft.PagePlatform.MACOS,):
-        print("Setting window size for desktop development")
-        page.window.width = 390
-        page.window.height = 844
-        page.window.resizable = False
+    # if page.platform in (ft.PagePlatform.MACOS,):
+    #     print("Setting window size for desktop development")
+    #     page.window.width = 390
+    #     page.window.height = 844
+    #     page.window.resizable = False
 
     content = ft.Container(expand=True)
 
@@ -52,6 +53,11 @@ def main(page: ft.Page):
         page.bgcolor = "#4C4D4F" if is_dark else "#83CEF3"
         page.update()
 
+    def set_global_unit(unit):
+        nonlocal current_unit
+        current_unit = unit
+        print("Global unit set to:", current_unit)
+
     def navigate(view_key):
         view_fn = views[view_key]
 
@@ -66,6 +72,15 @@ def main(page: ft.Page):
                     t,
                     set_language,
                     current_language,
+                    set_global_unit,
+                    current_unit
+                )
+            )
+        elif view_key in ["cubic_calculator"]:
+            content.content = base_layout(
+                view_fn(
+                    t,
+                    current_unit
                 )
             )
         else:
@@ -86,7 +101,8 @@ def main(page: ft.Page):
     # Menu inferior
     navigation = ft.NavigationBar(
         selected_index=0,
-        height=50,
+        #height=56,
+        elevation=0,
         destinations=[
             ft.NavigationBarDestination(icon=ft.Icons.HOME, adaptive=True),
             ft.NavigationBarDestination(icon=ft.Icons.POOL),
@@ -96,12 +112,19 @@ def main(page: ft.Page):
         ],
         on_change=on_navigation_change,
     )
+
     # Layout final
     page.add(
         ft.Column(
             spacing=0,
             expand=True,
-            controls=[content, navigation],
+            controls=[
+                ft.SafeArea(
+                    expand=True,
+                    content=content,
+                ),
+                navigation,
+            ],
         )
     )
 

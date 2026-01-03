@@ -2,9 +2,11 @@ import flet as ft
 
 
 def settings_view(
-    navigate, set_theme_mode, current_theme_mode, t, set_language, curr_lang="pt"
+    navigate, set_theme_mode, current_theme_mode, t, set_language, curr_lang,
+    set_global_unit, curr_unit
 ):
     mode_true = True if current_theme_mode == ft.ThemeMode.DARK else False
+
     return ft.Container(
         bgcolor=ft.Colors.SURFACE,
         content=ft.Column(
@@ -35,6 +37,15 @@ def settings_view(
                     label=t("settings.dark_mode"),
                     value=mode_true,
                     on_change=lambda e: set_theme_mode(e.control.value),
+                ),
+                ft.Dropdown(
+                    label=t("settings.units"), 
+                    value=curr_unit, 
+                    options=[
+                        ft.dropdown.Option("metric", "m³"),
+                        ft.dropdown.Option("imperial", "ft³"),
+                ],
+                    on_select=lambda e: set_global_unit(e.control.value),
                 ),
                 ft.TextButton(
                     t("settings.calculator"),

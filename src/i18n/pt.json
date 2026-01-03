@@ -9,6 +9,7 @@
   "settings.language": "Idioma",
   "settings.dark_mode": "Modo Escuro",
   "settings.calculator": "Calculadora",
+  "settings.units": "Unidades",
 
   "home.welcome": "Bem-vindo ao Smart Pool",
 
@@ -16,5 +17,17 @@
 
   "analysis.title": "Análise da Água",
   
-  "history.title": "Histórico de Manutenção"
+  "history.title": "Histórico de Manutenção",
+
+  "calculator.shape": "Formato da Piscina",
+  "calculator.compute": "Calcular",
+  "calculator.shape.round": "Redonda",
+  "calculator.shape.rectangle": "Retangular",
+  "calculator.radius": "Raio",
+  "calculator.width": "Largura",
+  "calculator.length": "Comprimento",
+  "calculator.depth": "Profundidade",
+  "calculator.error_invalid_input": "Por favor insira valores numéricos válidos.",
+  "calculator.volume": "Volume",
+  "calculator.copied": "Volume copiado para a área de transferência"
 }
