@@ -8,6 +8,7 @@ from views.settings import settings_view
 from views.analysis import analysis_view
 from views.history import history_view
 from views.cubic_calculator import cubic_calculator_view
+from views.login import login_view
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -19,6 +20,8 @@ def main(page: ft.Page):
     current_language = "pt"
     current_unit = "m"
     translator = Translator(lang=current_language)
+    is_authenticated = False
+    user_email = None
 
     print("Platform:", page.platform)
 
@@ -29,6 +32,7 @@ def main(page: ft.Page):
     #     page.window.resizable = False
 
     content = ft.Container(expand=True)
+    navigation = ft.Ref[ft.NavigationBar]()
 
     views = {
         "home": home_view,
@@ -46,7 +50,10 @@ def main(page: ft.Page):
         translator.load(lang)
         nonlocal current_language
         current_language = lang
-        navigate(view_key)
+        if is_authenticated:
+            navigate(view_key)
+        else:
+            show_login()
 
     def set_theme_mode(is_dark):
         page.theme_mode = ft.ThemeMode.DARK if is_dark else ft.ThemeMode.LIGHT
@@ -56,9 +63,12 @@ def main(page: ft.Page):
     def set_global_unit(unit):
         nonlocal current_unit
         current_unit = unit
-        print("Global unit set to:", current_unit)
 
     def navigate(view_key):
+        if not is_authenticated:
+            show_login()
+            return
+        
         view_fn = views[view_key]
 
         if view_key in ["pools"]:
@@ -88,18 +98,55 @@ def main(page: ft.Page):
         page.update()
 
     def on_navigation_change(e):
+        if not is_authenticated:
+            show_login()
+            return
+        
         index = e.control.selected_index
         view_key = [k for k in views.keys()][index]
 
         navigate(view_key)
-        ft.NavigationBar.selected_index = index
+        navigation.current.selected_index = index
         page.update()
 
-    # Conteúdo inicial
-    navigate("home")
+    def show_login():
+        """Show the login page."""
+        nonlocal is_authenticated
+        is_authenticated = False
+        
+        def on_login_success(email):
+            """Handle successful login."""
+            nonlocal is_authenticated, user_email
+            is_authenticated = True
+            user_email = email
+            # TODO: Store authentication state (e.g., in shared_preferences)
+            # For now, just navigate to home
+            navigation.current.visible = True
+            navigate("home")
+            page.update()
+        
+        def login_set_language(lang):
+            """Set language from login page."""
+            translator.load(lang)
+            nonlocal current_language
+            current_language = lang
+            show_login()  # Refresh login page with new language
+        
+        content.content = login_view(
+            page,
+            t,
+            login_set_language,
+            current_language,
+            on_login_success
+        )
+        
+        # Hide navigation bar on login page
+        navigation.current.visible = False
+        page.update()
 
     # Menu inferior
-    navigation = ft.NavigationBar(
+    nav_bar = ft.NavigationBar(
+        ref=navigation,
         selected_index=0,
         #height=56,
         elevation=0,
@@ -111,6 +158,7 @@ def main(page: ft.Page):
             ft.NavigationBarDestination(icon=ft.Icons.SETTINGS),
         ],
         on_change=on_navigation_change,
+        visible=False,  # Hidden initially (login page)
     )
 
     # Layout final
@@ -123,10 +171,13 @@ def main(page: ft.Page):
                     expand=True,
                     content=content,
                 ),
-                navigation,
+                nav_bar,
             ],
         )
     )
+    
+    # Show login page initially
+    show_login()
 
 
 if __name__ == "__main__":
