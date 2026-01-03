@@ -66,6 +66,14 @@ def main(page: ft.Page):
         nonlocal current_unit
         current_unit = unit
 
+    def logout():
+        """Handle user logout."""
+        nonlocal is_authenticated, user_email
+        is_authenticated = False
+        user_email = None
+        # TODO: Clear authentication state (e.g., from shared_preferences)
+        show_login()
+
     def navigate(view_key):
         if not is_authenticated:
             show_login()
@@ -85,7 +93,8 @@ def main(page: ft.Page):
                     set_language,
                     current_language,
                     set_global_unit,
-                    current_unit
+                    current_unit,
+                    logout
                 )
             )
         elif view_key in ["cubic_calculator"]:

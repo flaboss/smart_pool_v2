@@ -3,7 +3,7 @@ import flet as ft
 
 def settings_view(
     navigate, set_theme_mode, current_theme_mode, t, set_language, curr_lang,
-    set_global_unit, curr_unit
+    set_global_unit, curr_unit, logout
 ):
     mode_true = True if current_theme_mode == ft.ThemeMode.DARK else False
 
@@ -50,6 +50,13 @@ def settings_view(
                 ft.TextButton(
                     t("settings.calculator"),
                     on_click=lambda e: navigate("cubic_calculator"),
+                ),
+                ft.Divider(),
+                ft.Button(
+                    content=t("settings.logout"),
+                    icon=ft.Icons.LOGOUT,
+                    on_click=lambda e: logout(),
+                    color=ft.Colors.RED,
                 ),
             ],
             spacing=16,
