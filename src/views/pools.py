@@ -6,9 +6,14 @@ def pools_view(navigate, t):
         content=ft.Column(
             controls=[
                 ft.Text(t("pools.title"), size=24, weight=ft.FontWeight.BOLD),
-                ft.TextButton(
-                    t("settings.calculator"),
+                ft.FilledButton(
+                    content=t("settings.calculator"),
                     on_click=lambda e: navigate("cubic_calculator"),
+                ),
+                ft.FloatingActionButton(
+                    icon=ft.Icons.ADD,
+                    on_click=lambda e: navigate("cubic_calculator"),
+                    
                 ),
             ],
             spacing=16,
