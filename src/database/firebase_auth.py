@@ -1,14 +1,21 @@
 """Firebase Authentication module using REST API."""
 
 import os
-import json
 import logging
 from typing import Optional
-from dotenv import load_dotenv
-import httpx
 
-# Load environment variables
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # dotenv not available (e.g., on Android), use environment variables directly
+    pass
+
+try:
+    import httpx
+except ImportError:
+    httpx = None
+    logging.warning("httpx not available. Firebase authentication will not work.")
 
 logger = logging.getLogger(__name__)
 
@@ -21,14 +28,30 @@ class FirebaseAuth:
     
     @classmethod
     def initialize(cls):
-        """Initialize Firebase with API key from environment."""
-        cls._api_key = os.getenv("FIREBASE_API_KEY")
-        cls._project_id = os.getenv("FIREBASE_PROJECT_ID")
+        """Initialize Firebase with API key from environment, config file, or local storage."""
+        # Use the config loader which tries multiple sources
+        from .firebase_config import load_firebase_config
+        cls._api_key, cls._project_id = load_firebase_config()
         
         if not cls._api_key:
-            logger.warning("FIREBASE_API_KEY not found in environment variables")
+            logger.warning("FIREBASE_API_KEY not found. Please configure Firebase credentials.")
         if not cls._project_id:
-            logger.warning("FIREBASE_PROJECT_ID not found in environment variables")
+            logger.warning("FIREBASE_PROJECT_ID not found. Please configure Firebase credentials.")
+    
+    @classmethod
+    def set_credentials(cls, api_key: str, project_id: str):
+        """Set Firebase credentials and save to local storage."""
+        cls._api_key = api_key
+        cls._project_id = project_id
+        
+        # Save to local storage for persistence
+        try:
+            from .local_storage import LocalStorage
+            LocalStorage.save_preference("firebase_api_key", api_key)
+            LocalStorage.save_preference("firebase_project_id", project_id)
+            logger.info("Firebase credentials saved to local storage")
+        except ImportError:
+            pass
     
     @classmethod
     def _get_auth_url(cls, endpoint: str) -> str:
@@ -55,7 +78,10 @@ class FirebaseAuth:
             cls.initialize()
         
         if not cls._api_key:
-            return False, None, "Firebase API key not configured. Please check your .env file."
+            return False, None, "Firebase API key not configured. Please configure Firebase credentials."
+        
+        if httpx is None:
+            return False, None, "httpx library not available. Please install dependencies."
         
         try:
             url = cls._get_auth_url("accounts:signUp")
@@ -98,7 +124,10 @@ class FirebaseAuth:
             cls.initialize()
         
         if not cls._api_key:
-            return False, None, "Firebase API key not configured. Please check your .env file."
+            return False, None, "Firebase API key not configured. Please configure Firebase credentials."
+        
+        if httpx is None:
+            return False, None, "httpx library not available. Please install dependencies."
         
         try:
             url = cls._get_auth_url("accounts:signInWithPassword")
@@ -114,9 +143,7 @@ class FirebaseAuth:
                 
                 if response.status_code == 200:
                     user_id = data.get("localId")
-                    id_token = data.get("idToken")
                     logger.info(f"User signed in successfully: {user_id}")
-                    # Store token for future use if needed
                     return True, user_id, None
                 else:
                     error_msg = data.get("error", {}).get("message", "Unknown error")

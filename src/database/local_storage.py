@@ -1,50 +1,75 @@
 """Simple local storage for user preferences and authentication."""
 
 import json
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional, Dict, Any
 
-# Storage file location
-STORAGE_DIR = Path.home() / ".smart_pool_v2"
-STORAGE_FILE = STORAGE_DIR / "user_data.json"
-
 # Session expiration: 30 days
 SESSION_EXPIRY_DAYS = 30
+
+# Cache for storage file path
+_storage_file_cache = None
+
+
+def _get_storage_path():
+    """Get storage path that works on all platforms including Android."""
+    global _storage_file_cache
+    if _storage_file_cache is not None:
+        return _storage_file_cache
+    
+    try:
+        # Try to use app-specific directory (works on Android)
+        app_data_dir = os.getenv("FLET_APP_DATA_DIR")
+        if app_data_dir:
+            storage_dir = Path(app_data_dir) / "smart_pool_v2"
+            storage_dir.mkdir(parents=True, exist_ok=True)
+            _storage_file_cache = storage_dir / "user_data.json"
+            return _storage_file_cache
+    except Exception:
+        pass
+    
+    try:
+        # Fallback to home directory (works on desktop)
+        storage_dir = Path.home() / ".smart_pool_v2"
+        storage_dir.mkdir(parents=True, exist_ok=True)
+        _storage_file_cache = storage_dir / "user_data.json"
+        return _storage_file_cache
+    except Exception:
+        # Last resort: use current directory
+        _storage_file_cache = Path("user_data.json")
+        return _storage_file_cache
 
 
 class LocalStorage:
     """Simple local storage using JSON file."""
     
     @staticmethod
-    def _ensure_storage_dir():
-        """Create storage directory if it doesn't exist."""
-        STORAGE_DIR.mkdir(parents=True, exist_ok=True)
-    
-    @staticmethod
     def _load_data() -> Dict[str, Any]:
         """Load data from storage file."""
-        LocalStorage._ensure_storage_dir()
-        
-        if not STORAGE_FILE.exists():
-            return {}
-        
         try:
-            with open(STORAGE_FILE, 'r', encoding='utf-8') as f:
+            storage_file = _get_storage_path()
+            if not storage_file.exists():
+                return {}
+            
+            with open(storage_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except (json.JSONDecodeError, IOError):
-            # If file is corrupted, return empty dict
+        except (json.JSONDecodeError, IOError, OSError, PermissionError, Exception) as e:
+            # If file is corrupted or inaccessible, return empty dict
+            print(f"Error loading storage: {e}")
             return {}
     
     @staticmethod
     def _save_data(data: Dict[str, Any]):
         """Save data to storage file."""
-        LocalStorage._ensure_storage_dir()
-        
         try:
-            with open(STORAGE_FILE, 'w', encoding='utf-8') as f:
+            storage_file = _get_storage_path()
+            # Ensure parent directory exists
+            storage_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(storage_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2)
-        except IOError as e:
+        except (IOError, OSError, PermissionError, Exception) as e:
             print(f"Error saving data: {e}")
     
     @staticmethod

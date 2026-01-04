@@ -16,10 +16,17 @@ logger.setLevel(logging.INFO)
 
 
 def main(page: ft.Page):
+    # Set default background to prevent black screen
+    page.bgcolor = "#83CEF3"  # Light blue default
     page.title = "Smart Pool"
     
-    # Load saved preferences
-    saved_prefs = LocalStorage.get_all_preferences()
+    # Load saved preferences with error handling
+    try:
+        saved_prefs = LocalStorage.get_all_preferences()
+    except Exception as e:
+        print(f"Error loading preferences: {e}")
+        saved_prefs = {}
+    
     current_language = saved_prefs.get("language", "pt")
     current_unit = saved_prefs.get("unit", "metric")
     saved_theme = saved_prefs.get("theme", "system")
@@ -40,13 +47,17 @@ def main(page: ft.Page):
     user_email = None
     user_id = None
 
-    # Check for saved authentication
-    saved_auth = LocalStorage.get_auth()
-    if saved_auth:
-        is_authenticated = True
-        user_email = saved_auth.get("email")
-        user_id = saved_auth.get("user_id")
-        print(f"Auto-login for user: {user_email}")
+    # Check for saved authentication with error handling
+    try:
+        saved_auth = LocalStorage.get_auth()
+        if saved_auth:
+            is_authenticated = True
+            user_email = saved_auth.get("email")
+            user_id = saved_auth.get("user_id")
+            print(f"Auto-login for user: {user_email}")
+    except Exception as e:
+        print(f"Error loading auth: {e}")
+        saved_auth = None
 
     print("Platform:", page.platform)
 
@@ -226,11 +237,29 @@ def main(page: ft.Page):
     )
     
     # Initialize app - show login or home based on authentication
-    if is_authenticated:
-        navigation.current.visible = True
-        navigate("home")
-    else:
-        show_login()
+    try:
+        if is_authenticated:
+            navigation.current.visible = True
+            navigate("home")
+        else:
+            show_login()
+    except Exception as e:
+        print(f"Error initializing app: {e}")
+        import traceback
+        traceback.print_exc()
+        # Show error message on page
+        page.add(
+            ft.Container(
+                content=ft.Column([
+                    ft.Text("Error initializing app", size=20, weight=ft.FontWeight.BOLD),
+                    ft.Text(str(e), size=12),
+                ]),
+                padding=20,
+                alignment=ft.Alignment.CENTER,
+                expand=True,
+            )
+        )
+        page.update()
 
 
 if __name__ == "__main__":
