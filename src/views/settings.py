@@ -1,4 +1,5 @@
 import flet as ft
+from database.local_storage import LocalStorage
 
 
 def settings_view(
@@ -6,21 +7,41 @@ def settings_view(
     set_global_unit, curr_unit, logout
 ):
     mode_true = True if current_theme_mode == ft.ThemeMode.DARK else False
+    
+    # Load saved user info
+    saved_prefs = LocalStorage.get_all_preferences()
+    saved_name = saved_prefs.get("name", "")
+    saved_country = saved_prefs.get("country", "")
+    saved_city = saved_prefs.get("city", "")
+    
+    # Create text fields with saved values
+    name_field = ft.TextField(
+        label=t("settings.name"),
+        hint_text=t("settings.name_hint"),
+        value=saved_name,
+        on_change=lambda e: LocalStorage.save_preference("name", e.control.value),
+    )
+    country_field = ft.TextField(
+        label=t("settings.country"),
+        hint_text=t("settings.country_hint"),
+        value=saved_country,
+        on_change=lambda e: LocalStorage.save_preference("country", e.control.value),
+    )
+    city_field = ft.TextField(
+        label=t("settings.city"),
+        hint_text=t("settings.city_hint"),
+        value=saved_city,
+        on_change=lambda e: LocalStorage.save_preference("city", e.control.value),
+    )
 
     return ft.Container(
         bgcolor=ft.Colors.SURFACE,
         content=ft.Column(
             controls=[
                 ft.Text(t("settings.title"), size=24, weight=ft.FontWeight.BOLD),
-                ft.TextField(
-                    label=t("settings.name"), hint_text=t("settings.name_hint")
-                ),
-                ft.TextField(
-                    label=t("settings.country"), hint_text=t("settings.country_hint")
-                ),
-                ft.TextField(
-                    label=t("settings.city"), hint_text=t("settings.city_hint")
-                ),
+                name_field,
+                country_field,
+                city_field,
                 ft.Dropdown(
                     label=t("settings.language"),
                     value=curr_lang,

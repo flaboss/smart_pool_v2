@@ -9,6 +9,7 @@ from views.analysis import analysis_view
 from views.history import history_view
 from views.cubic_calculator import cubic_calculator_view
 from views.login import login_view
+from database.local_storage import LocalStorage
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -16,12 +17,36 @@ logger.setLevel(logging.INFO)
 
 def main(page: ft.Page):
     page.title = "Smart Pool"
-    page.theme_mode = ft.ThemeMode.SYSTEM
-    current_language = "pt"
-    current_unit = "m"
+    
+    # Load saved preferences
+    saved_prefs = LocalStorage.get_all_preferences()
+    current_language = saved_prefs.get("language", "pt")
+    current_unit = saved_prefs.get("unit", "metric")
+    saved_theme = saved_prefs.get("theme", "system")
+    
+    # Set theme mode
+    if saved_theme == "dark":
+        page.theme_mode = ft.ThemeMode.DARK
+        page.bgcolor = "#4C4D4F"
+    elif saved_theme == "light":
+        page.theme_mode = ft.ThemeMode.LIGHT
+        page.bgcolor = "#83CEF3"
+    else:
+        page.theme_mode = ft.ThemeMode.SYSTEM
+        # System theme will be set automatically
+    
     translator = Translator(lang=current_language)
     is_authenticated = False
     user_email = None
+    user_id = None
+
+    # Check for saved authentication
+    saved_auth = LocalStorage.get_auth()
+    if saved_auth:
+        is_authenticated = True
+        user_email = saved_auth.get("email")
+        user_id = saved_auth.get("user_id")
+        print(f"Auto-login for user: {user_email}")
 
     print("Platform:", page.platform)
 
@@ -57,6 +82,7 @@ def main(page: ft.Page):
         translator.load(lang)
         nonlocal current_language
         current_language = lang
+        LocalStorage.save_preference("language", lang)
         if is_authenticated:
             navigate(view_key)
         else:
@@ -65,18 +91,23 @@ def main(page: ft.Page):
     def set_theme_mode(is_dark):
         page.theme_mode = ft.ThemeMode.DARK if is_dark else ft.ThemeMode.LIGHT
         page.bgcolor = "#4C4D4F" if is_dark else "#83CEF3"
+        # Save theme preference
+        theme_value = "dark" if is_dark else "light"
+        LocalStorage.save_preference("theme", theme_value)
         page.update()
 
     def set_global_unit(unit):
         nonlocal current_unit
         current_unit = unit
+        LocalStorage.save_preference("unit", unit)
 
     def logout():
         """Handle user logout."""
-        nonlocal is_authenticated, user_email
+        nonlocal is_authenticated, user_email, user_id
         is_authenticated = False
         user_email = None
-        # TODO: Clear authentication state (e.g., from shared_preferences)
+        user_id = None
+        LocalStorage.clear_auth()
         show_login()
 
     def navigate(view_key):
@@ -130,13 +161,14 @@ def main(page: ft.Page):
         nonlocal is_authenticated
         is_authenticated = False
         
-        def on_login_success(email):
+        def on_login_success(email, user_id_param=None):
             """Handle successful login."""
-            nonlocal is_authenticated, user_email
+            nonlocal is_authenticated, user_email, user_id
             is_authenticated = True
             user_email = email
-            # TODO: Store authentication state (e.g., in shared_preferences)
-            # For now, just navigate to home
+            user_id = user_id_param or email  # Use email as fallback if no user_id
+            # Save authentication state
+            LocalStorage.save_auth(user_id, email)
             navigation.current.visible = True
             navigate("home")
             page.update()
@@ -193,8 +225,12 @@ def main(page: ft.Page):
         )
     )
     
-    # Show login page initially
-    show_login()
+    # Initialize app - show login or home based on authentication
+    if is_authenticated:
+        navigation.current.visible = True
+        navigate("home")
+    else:
+        show_login()
 
 
 if __name__ == "__main__":

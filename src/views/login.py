@@ -65,7 +65,7 @@ def login_view(page, t, set_language, current_language, on_login_success):
                 if success:
                     # Clear error and proceed
                     error_text.current.visible = False
-                    on_login_success(email)
+                    on_login_success(email, user_id)
                 else:
                     error_text.current.value = error_msg or t("login.error_signup_failed")
                     error_text.current.visible = True
@@ -78,7 +78,7 @@ def login_view(page, t, set_language, current_language, on_login_success):
                 if success:
                     # Clear error and proceed
                     error_text.current.visible = False
-                    on_login_success(email)
+                    on_login_success(email, user_id)
                 else:
                     error_text.current.value = error_msg or t("login.error_login_failed")
                     error_text.current.visible = True
