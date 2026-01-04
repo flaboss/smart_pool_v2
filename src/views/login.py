@@ -1,4 +1,5 @@
 import flet as ft
+from database.firebase_auth import FirebaseAuth
 
 
 def login_view(page, t, set_language, current_language, on_login_success):
@@ -12,7 +13,7 @@ def login_view(page, t, set_language, current_language, on_login_success):
     password_field = ft.Ref[ft.TextField]()
     confirm_password_field = ft.Ref[ft.TextField]()
     error_text = ft.Ref[ft.Text]()
-    submit_button = ft.Ref[ft.ElevatedButton]()
+    submit_button = ft.Ref[ft.Button]()
     toggle_button = ft.Ref[ft.TextButton]()
     
     def toggle_mode(e):
@@ -25,7 +26,7 @@ def login_view(page, t, set_language, current_language, on_login_success):
         error_text.current.visible = False
         page.update()
     
-    def handle_submit(e):
+    async def handle_submit(e):
         """Handle login or signup submission."""
         email = email_field.current.value
         password = password_field.current.value
@@ -43,25 +44,51 @@ def login_view(page, t, set_language, current_language, on_login_success):
             page.update()
             return
         
-        if is_signup_mode[0]:
-            confirm_password = confirm_password_field.current.value
-            if password != confirm_password:
-                error_text.current.value = t("login.error_password_mismatch")
-                error_text.current.visible = True
-                page.update()
-                return
-            
-            # TODO: Implement Firebase signup here
-            # For now, just proceed with login
-            print(f"Signup: {email}")
-        
-        # TODO: Implement Firebase login here
-        # For now, just proceed with login
-        print(f"Login: {email}")
-        
-        # Clear error and proceed
+        # Disable button during processing
+        submit_button.current.disabled = True
         error_text.current.visible = False
-        on_login_success(email)
+        page.update()
+        
+        try:
+            if is_signup_mode[0]:
+                confirm_password = confirm_password_field.current.value
+                if password != confirm_password:
+                    error_text.current.value = t("login.error_password_mismatch")
+                    error_text.current.visible = True
+                    submit_button.current.disabled = False
+                    page.update()
+                    return
+                
+                # Firebase signup
+                success, user_id, error_msg = await FirebaseAuth.sign_up(email, password)
+                
+                if success:
+                    # Clear error and proceed
+                    error_text.current.visible = False
+                    on_login_success(email)
+                else:
+                    error_text.current.value = error_msg or t("login.error_signup_failed")
+                    error_text.current.visible = True
+                    submit_button.current.disabled = False
+                    page.update()
+            else:
+                # Firebase login
+                success, user_id, error_msg = await FirebaseAuth.sign_in(email, password)
+                
+                if success:
+                    # Clear error and proceed
+                    error_text.current.visible = False
+                    on_login_success(email)
+                else:
+                    error_text.current.value = error_msg or t("login.error_login_failed")
+                    error_text.current.visible = True
+                    submit_button.current.disabled = False
+                    page.update()
+        except Exception as ex:
+            error_text.current.value = f"An error occurred: {str(ex)}"
+            error_text.current.visible = True
+            submit_button.current.disabled = False
+            page.update()
     
     # Create the view
     return ft.Container(

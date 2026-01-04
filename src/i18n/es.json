@@ -47,5 +47,7 @@
   "login.no_account": "¿No tienes una cuenta?",
   "login.error_email_required": "El correo electrónico es obligatorio",
   "login.error_password_length": "La contraseña debe tener al menos 6 caracteres",
-  "login.error_password_mismatch": "Las contraseñas no coinciden"
+  "login.error_password_mismatch": "Las contraseñas no coinciden",
+  "login.error_signup_failed": "Error al crear la cuenta. Por favor, intente nuevamente.",
+  "login.error_login_failed": "Error al iniciar sesión. Por favor, verifique sus credenciales."
 }

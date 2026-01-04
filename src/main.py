@@ -25,6 +25,11 @@ def main(page: ft.Page):
 
     print("Platform:", page.platform)
 
+    # Configure page padding for Android to avoid system bars
+    if page.platform == ft.PagePlatform.ANDROID:
+        page.padding = 0
+        page.spacing = 0
+
     # Set window size for desktop development to simulate mobile view
     if page.platform in (ft.PagePlatform.MACOS, ft.PagePlatform.WINDOWS, ft.PagePlatform.LINUX):
         print("Setting window size for desktop development")
@@ -159,7 +164,7 @@ def main(page: ft.Page):
     nav_bar = ft.NavigationBar(
         ref=navigation,
         selected_index=0,
-        #height=56,
+        height=56 if page.platform == ft.PagePlatform.ANDROID else None,
         elevation=0,
         destinations=[
             ft.NavigationBarDestination(icon=ft.Icons.HOME, adaptive=True),
@@ -172,18 +177,19 @@ def main(page: ft.Page):
         visible=False,  # Hidden initially (login page)
     )
 
-    # Layout final
+    # Layout final - use SafeArea to handle system bars on all platforms
+    # On Android, this prevents content from going under status bar and navigation bar
     page.add(
-        ft.Column(
-            spacing=0,
+        ft.SafeArea(
             expand=True,
-            controls=[
-                ft.SafeArea(
-                    expand=True,
-                    content=content,
-                ),
-                nav_bar,
-            ],
+            content=ft.Column(
+                spacing=0,
+                expand=True,
+                controls=[
+                    content,
+                    nav_bar,
+                ],
+            ),
         )
     )
     
