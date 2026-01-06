@@ -33,20 +33,30 @@ class AnalysisContent(ft.Container):
         )
         self.has_image = False
         
-        # Dialogs
-        self.photo_dialog = ft.AlertDialog(
-            title=ft.Text(self.t("analysis.take_photo")),
-            content=ft.Text(self.t("analysis.photo_instruction")),
+        self.file_picker = None # Disabled for now
+        
+        self.photo_options_dialog = ft.AlertDialog(
+            title=ft.Text(self.t("analysis.dialog_title")),
             actions=[
-                ft.TextButton("OK", on_click=self._on_photo_taken)
+                ft.TextButton(self.t("analysis.option_camera"), on_click=self._on_camera_click),
+                ft.TextButton(self.t("analysis.option_gallery"), on_click=self._on_gallery_click),
+                ft.TextButton(self.t("common.cancel"), on_click=self._close_photo_dialog)
             ],
+            actions_alignment=ft.MainAxisAlignment.END,
         )
+
+        self.main_container = ft.Container(expand=True)
+        self.content = self.main_container
 
         self.refresh_view()
 
     def did_mount(self):
         # Determine if we need to fetch pools
         self._load_pools()
+        # Add dialog to page overlay
+        if self.page:
+            self.page.overlay.append(self.photo_options_dialog)
+            self.page.update()
 
     def _load_pools(self):
         # Syncing might be async, but we can get local pools immediately
@@ -60,18 +70,14 @@ class AnalysisContent(ft.Container):
 
     def refresh_view(self):
         if self.current_view == "menu":
-            self.content = self._build_menu()
+            self.main_container.content = self._build_menu()
         elif self.current_view == "form":
-            self.content = self._build_form()
+            self.main_container.content = self._build_form()
         elif self.current_view == "result":
-            self.content = self._build_result()
-        
-        # Ensure dialogs are in overlay
+            self.main_container.content = self._build_result()
         try:
             if self.page:
-                 if self.photo_dialog not in self.page.overlay:
-                     self.page.overlay.append(self.photo_dialog)
-            self.update()
+                 self.main_container.update()
         except RuntimeError:
             pass
 
@@ -135,7 +141,7 @@ class AnalysisContent(ft.Container):
                 ft.OutlinedButton(
                     content=ft.Row([
                         ft.Icon(ft.Icons.CAMERA_ALT, color=ft.Colors.PRIMARY if not self.has_image else ft.Colors.GREEN),
-                        ft.Text(self.t("analysis.take_photo"), color=ft.Colors.PRIMARY if not self.has_image else ft.Colors.GREEN)
+                        ft.Text(self.t("analysis.take_photo") if not self.has_image else self.t("analysis.photo_taken"), color=ft.Colors.PRIMARY if not self.has_image else ft.Colors.GREEN)
                     ], alignment=ft.MainAxisAlignment.CENTER),
                     on_click=self._open_photo_dialog,
                     style=ft.ButtonStyle(
@@ -192,15 +198,41 @@ class AnalysisContent(ft.Container):
         self.current_view = view_name
         self.refresh_view()
 
+    # def _on_image_picked(self, e):
+    #     if e.files and len(e.files) > 0:
+    #         self.image_path = e.files[0].path
+    #         self.has_image = True
+    #         self.page.show_dialog(ft.SnackBar(content=ft.Text("Image loaded!")))
+    #         self.refresh_view()
+    #     else:
+    #         # User cancelled
+    #         pass
+
     def _open_photo_dialog(self, e):
-        self.photo_dialog.open = True
+        self.photo_options_dialog.open = True
         self.page.update()
 
-    def _on_photo_taken(self, e):
-        self.has_image = True
-        self.photo_dialog.open = False
+    def _close_photo_dialog(self, e):
+        self.photo_options_dialog.open = False
         self.page.update()
-        self.refresh_view() # To update button color
+
+    def _on_camera_click(self, e):
+        # Placeholder for Camera
+        self.photo_options_dialog.open = False
+        self._mock_photo_taken(None) # Re-use mock for now
+        self.page.update()
+
+    def _on_gallery_click(self, e):
+        # Placeholder for Gallery
+        self.photo_options_dialog.open = False
+        self._mock_photo_taken(None) # Re-use mock for now
+        self.page.update()
+
+    def _mock_photo_taken(self, e):
+        self.image_path = "mock_image.jpg" # Dummy path
+        self.has_image = True
+        self.page.show_dialog(ft.SnackBar(content=ft.Text("Mock Photo Taken")))
+        self.refresh_view()
 
     async def _on_analyze_click(self, e):
         # Validate inputs
@@ -230,7 +262,8 @@ class AnalysisContent(ft.Container):
             'alkalinity': self.alkalinity_field.value or None,
             'cyanuric_acid': self.cyanuric_field.value or None,
             'observation': self.observation_field.value,
-            'has_image': self.has_image
+            'has_image': self.has_image,
+            'image_path': self.image_path
         }
 
         # Run Analysis

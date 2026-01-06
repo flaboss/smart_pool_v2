@@ -1,4 +1,6 @@
 
+from .image_analyzer import ImageAnalyzer
+
 class PoolAnalyzer:
     @staticmethod
     def analyze(params, t):
@@ -72,10 +74,11 @@ class PoolAnalyzer:
             except ValueError:
                 pass
 
-        # Image/Observation Handling (Mocked for simple logic)
-        if params.get('has_image'):
-            # simple check - in a real model we would process the image
-            pass
+        # Image Analysis
+        if params.get('has_image') and params.get('image_path'):
+            # In a real scenario, we would pass the actual image path/data
+            image_analysis = ImageAnalyzer.analyze(params.get('image_path'), t)
+            analysis_points.append(image_analysis)
 
         # Construct Analysis text
         analysis_text = "\n".join([f"- {point}" for point in analysis_points])
