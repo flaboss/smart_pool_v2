@@ -62,6 +62,30 @@ class PoolsContent(ft.Container):
         except RuntimeError:
             pass
 
+        try:
+            self.update()
+        except RuntimeError:
+            pass
+
+    def did_mount(self):
+        """Called when control is added to page."""
+        # Trigger background sync
+        # We can't await here easily without freezing UI or run_task
+        # Flet 0.21+ has self.page.run_task(self._sync_data)
+        # But to be safe with older versions or simple runs:
+        import asyncio
+        # We can try to use asyncio.create_task if loop is running
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._sync_data())
+        except RuntimeError:
+            pass
+
+    async def _sync_data(self):
+        await PoolService.sync_pools(self.user_id)
+        # Refresh view after sync
+        self.refresh_view()
+
     def _build_list_view(self):
         pools = PoolService.get_pools(self.user_id)
         

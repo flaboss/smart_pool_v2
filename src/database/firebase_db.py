@@ -119,6 +119,52 @@ class FirebaseDB:
             logger.error(f"Exception deleting from Firebase: {e}")
             return False
 
+    @classmethod
+    async def get_pools(cls, user_id: str, id_token: str) -> list[Dict[str, Any]]:
+        """
+        Fetch all pools for a user from Firestore.
+        Path: users/{user_id}/pools
+        """
+        if not cls._project_id:
+            cls.initialize()
+            
+        if not cls._project_id or not cls._base_url:
+            return []
+            
+        if httpx is None:
+            return []
+
+        # List documents in the collection
+        url = f"{cls._base_url}/users/{user_id}/pools?key={cls._api_key}"
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    url, 
+                    headers={"Authorization": f"Bearer {id_token}"} if id_token else {}
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    documents = data.get('documents', [])
+                    pools = []
+                    for doc in documents:
+                        # doc['name'] contains the full path, doc['fields'] contains the data
+                        fields = doc.get('fields', {})
+                        pool_data = cls._from_firestore_fields(fields)
+                        # Ensure ID is present (it might be in the fields or we extract from name)
+                        # Our save logic puts ID in fields, so it should be there.
+                        pools.append(pool_data)
+                    
+                    logger.info(f"Fetched {len(pools)} pools from Firebase.")
+                    return pools
+                else:
+                    logger.error(f"Error fetching pools from Firebase: {response.text}")
+                    return []
+        except Exception as e:
+            logger.error(f"Exception fetching pools from Firebase: {e}")
+            return []
+
     @staticmethod
     def _to_firestore_fields(data: Dict[str, Any]) -> Dict[str, Any]:
         """Convert a standard dict to Firestore fields format."""
@@ -131,9 +177,27 @@ class FirebaseDB:
             elif isinstance(v, (int, float)):
                 fields[k] = {"doubleValue": float(v)} # Firestore uses double for numbers
             elif isinstance(v, dict):
-                 fields[k] = {"mapValue": {"fields": FirebaseDB._to_firestore_fields(v)}}
+                fields[k] = {"mapValue": {"fields": FirebaseDB._to_firestore_fields(v)}}
             elif isinstance(v, list):
-                 # Simplified list handling (assuming list of strings or simple types)
-                 # Implementing full recursion might be overkill but good for robustness
-                 pass 
+                # Simplified list handling (assuming list of strings or simple types)
+                # Not implemented in save yet, so skipping for now to match save logic
+                pass 
         return fields
+
+    @staticmethod
+    def _from_firestore_fields(fields: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert Firestore fields format back to standard dict."""
+        data = {}
+        for k, v in fields.items():
+            if "stringValue" in v:
+                data[k] = v["stringValue"]
+            elif "booleanValue" in v:
+                data[k] = v["booleanValue"]
+            elif "doubleValue" in v:
+                data[k] = v["doubleValue"]
+            elif "integerValue" in v:
+                data[k] = int(v["integerValue"])
+            elif "mapValue" in v:
+                data[k] = FirebaseDB._from_firestore_fields(v["mapValue"].get("fields", {}))
+            # Ignored listValue for now as we didn't implement it in _to_firestore_fields
+        return data

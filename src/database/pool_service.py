@@ -83,3 +83,45 @@ class PoolService:
         except Exception as e:
             print(f"Error deleting pool: {e}")
             return False
+
+    @staticmethod
+    async def sync_pools(user_id: str) -> None:
+        """Fetch pools from Firebase and merge with local storage."""
+        try:
+            auth = LocalStorage.get_auth()
+            if not auth or not auth.get('token'):
+                return
+
+            remote_pools = await FirebaseDB.get_pools(user_id, auth.get('token'))
+            if not remote_pools:
+                return
+
+            local_pools = PoolService.get_pools(user_id)
+            local_map = {p.get('id'): p for p in local_pools}
+            
+            # Merge strategy: Remote fields overwrite local if ID matches
+            # Also add new pools from remote
+            updated = False
+            for remote_pool in remote_pools:
+                pool_id = remote_pool.get('id')
+                if not pool_id:
+                    continue
+                
+                if pool_id in local_map:
+                    # Check if actually different? For now, just overwrite to be safe
+                    # ideally we check updated_at but let's assume remote is truth for now 
+                    # as user compliant about missing data.
+                    local_map[pool_id] = remote_pool
+                    updated = True
+                else:
+                    local_map[pool_id] = remote_pool
+                    updated = True
+            
+            if updated:
+                new_list = list(local_map.values())
+                key = f"pools_{user_id}"
+                LocalStorage.save_preference(key, new_list)
+                print(f"Synced {len(new_list)} pools (merged local and remote).")
+                
+        except Exception as e:
+            print(f"Error syncing pools: {e}")
