@@ -165,6 +165,45 @@ class FirebaseDB:
             logger.error(f"Exception fetching pools from Firebase: {e}")
             return []
 
+    @classmethod
+    async def save_analysis(cls, user_id: str, analysis_data: Dict[str, Any], id_token: str) -> bool:
+        """
+        Save analysis result to Firestore.
+        Path: users/{user_id}/analysis (Collection)
+        # Note: We use POST to create a new document with auto-generated ID
+        """
+        if not cls._project_id:
+            cls.initialize()
+            
+        if not cls._project_id or not cls._base_url:
+            return False
+            
+        if httpx is None:
+            return False
+
+        # Create a new document in the analysis collection
+        url = f"{cls._base_url}/users/{user_id}/analysis?key={cls._api_key}"
+        
+        firestore_fields = cls._to_firestore_fields(analysis_data)
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    url, 
+                    json={"fields": firestore_fields},
+                    headers={"Authorization": f"Bearer {id_token}"} if id_token else {}
+                )
+                
+                if response.status_code == 200:
+                    logger.info("Analysis saved to Firebase.")
+                    return True
+                else:
+                    logger.error(f"Error saving analysis to Firebase: {response.text}")
+                    return False
+        except Exception as e:
+            logger.error(f"Exception saving analysis to Firebase: {e}")
+            return False
+
     @staticmethod
     def _to_firestore_fields(data: Dict[str, Any]) -> Dict[str, Any]:
         """Convert a standard dict to Firestore fields format."""
