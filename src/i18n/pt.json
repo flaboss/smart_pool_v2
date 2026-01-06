@@ -110,5 +110,6 @@
   "login.error_password_length": "A senha deve ter pelo menos 6 caracteres",
   "login.error_password_mismatch": "As senhas não coincidem",
   "login.error_signup_failed": "Falha ao criar conta. Por favor, tente novamente.",
-  "login.error_login_failed": "Falha ao entrar. Por favor, verifique suas credenciais."
+  "login.error_login_failed": "Falha ao entrar. Por favor, verifique suas credenciais.",
+  "common.cancel": "Cancelar"
 }

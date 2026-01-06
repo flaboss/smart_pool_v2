@@ -110,5 +110,6 @@
   "login.error_password_length": "Password must be at least 6 characters",
   "login.error_password_mismatch": "Passwords do not match",
   "login.error_signup_failed": "Failed to create account. Please try again.",
-  "login.error_login_failed": "Failed to sign in. Please check your credentials."
+  "login.error_login_failed": "Failed to sign in. Please check your credentials.",
+  "common.cancel": "Cancel"
 }
