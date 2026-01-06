@@ -70,6 +70,7 @@ def settings_view(
                 ),
                 ft.TextButton(
                     t("settings.calculator"),
+                    icon=ft.Icons.CALCULATE,
                     on_click=lambda e: navigate("cubic_calculator"),
                 ),
                 ft.Divider(),

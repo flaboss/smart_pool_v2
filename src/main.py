@@ -129,7 +129,7 @@ def main(page: ft.Page):
         view_fn = views[view_key]
 
         if view_key in ["pools"]:
-            content.content = base_layout(view_fn(navigate, t))
+            content.content = base_layout(view_fn(navigate, t, current_unit))
         elif view_key in ["settings"]:
             content.content = base_layout(
                 view_fn(
@@ -172,14 +172,14 @@ def main(page: ft.Page):
         nonlocal is_authenticated
         is_authenticated = False
         
-        def on_login_success(email, user_id_param=None):
+        def on_login_success(email, user_id_param=None, token=None):
             """Handle successful login."""
             nonlocal is_authenticated, user_email, user_id
             is_authenticated = True
             user_email = email
             user_id = user_id_param or email  # Use email as fallback if no user_id
             # Save authentication state
-            LocalStorage.save_auth(user_id, email)
+            LocalStorage.save_auth(user_id, email, token)
             navigation.current.visible = True
             navigate("home")
             page.update()

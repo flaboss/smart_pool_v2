@@ -63,7 +63,7 @@ class FirebaseAuth:
         return f"{base_url}/{endpoint}?key={cls._api_key}"
     
     @classmethod
-    async def sign_up(cls, email: str, password: str) -> tuple[bool, Optional[str], Optional[str]]:
+    async def sign_up(cls, email: str, password: str) -> tuple[bool, Optional[str], Optional[str], Optional[str]]:
         """
         Sign up a new user with email and password.
         
@@ -72,16 +72,16 @@ class FirebaseAuth:
             password: User password
             
         Returns:
-            Tuple of (success: bool, user_id: Optional[str], error_message: Optional[str])
+            Tuple of (success: bool, user_id: Optional[str], token: Optional[str], error_message: Optional[str])
         """
         if not cls._api_key:
             cls.initialize()
         
         if not cls._api_key:
-            return False, None, "Firebase API key not configured. Please configure Firebase credentials."
+            return False, None, None, "Firebase API key not configured. Please configure Firebase credentials."
         
         if httpx is None:
-            return False, None, "httpx library not available. Please install dependencies."
+            return False, None, None, "httpx library not available. Please install dependencies."
         
         try:
             url = cls._get_auth_url("accounts:signUp")
@@ -97,19 +97,20 @@ class FirebaseAuth:
                 
                 if response.status_code == 200:
                     user_id = data.get("localId")
+                    token = data.get("idToken")
                     logger.info(f"User created successfully: {user_id}")
-                    return True, user_id, None
+                    return True, user_id, token, None
                 else:
                     error_msg = data.get("error", {}).get("message", "Unknown error")
                     logger.error(f"Sign up error: {error_msg}")
-                    return False, None, cls._format_error_message(error_msg)
+                    return False, None, None, cls._format_error_message(error_msg)
                     
         except Exception as e:
             logger.error(f"Sign up exception: {e}")
-            return False, None, f"Failed to create account: {str(e)}"
+            return False, None, None, f"Failed to create account: {str(e)}"
     
     @classmethod
-    async def sign_in(cls, email: str, password: str) -> tuple[bool, Optional[str], Optional[str]]:
+    async def sign_in(cls, email: str, password: str) -> tuple[bool, Optional[str], Optional[str], Optional[str]]:
         """
         Sign in a user with email and password.
         
@@ -118,16 +119,16 @@ class FirebaseAuth:
             password: User password
             
         Returns:
-            Tuple of (success: bool, user_id: Optional[str], error_message: Optional[str])
+            Tuple of (success: bool, user_id: Optional[str], token: Optional[str], error_message: Optional[str])
         """
         if not cls._api_key:
             cls.initialize()
         
         if not cls._api_key:
-            return False, None, "Firebase API key not configured. Please configure Firebase credentials."
+            return False, None, None, "Firebase API key not configured. Please configure Firebase credentials."
         
         if httpx is None:
-            return False, None, "httpx library not available. Please install dependencies."
+            return False, None, None, "httpx library not available. Please install dependencies."
         
         try:
             url = cls._get_auth_url("accounts:signInWithPassword")
@@ -143,16 +144,17 @@ class FirebaseAuth:
                 
                 if response.status_code == 200:
                     user_id = data.get("localId")
+                    token = data.get("idToken")
                     logger.info(f"User signed in successfully: {user_id}")
-                    return True, user_id, None
+                    return True, user_id, token, None
                 else:
                     error_msg = data.get("error", {}).get("message", "Unknown error")
                     logger.error(f"Sign in error: {error_msg}")
-                    return False, None, cls._format_error_message(error_msg)
+                    return False, None, None, cls._format_error_message(error_msg)
                     
         except Exception as e:
             logger.error(f"Sign in exception: {e}")
-            return False, None, f"Failed to sign in: {str(e)}"
+            return False, None, None, f"Failed to sign in: {str(e)}"
     
     @classmethod
     def _format_error_message(cls, error_msg: str) -> str:

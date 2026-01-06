@@ -54,15 +54,18 @@ def cubic_calculator_view(t, current_unit):
                 l = float(length_field.value)
                 volume = l * w * depth
             result_text.value = f'{t("calculator.volume")}: {volume:.3f} {unit}³'
+            copy_btn.visible = True
         except Exception:
             result_text.value = t("calculator.error_invalid_input")
+            copy_btn.visible = False
         result_text.update()
-
+        copy_btn.update()
+    
     shape_dropdown.on_select = _on_shape_change
 
     compute_btn = ft.Button(content=t("calculator.compute"), on_click=_compute)
-    copy_btn = ft.IconButton(icon=ft.Icons.CONTENT_COPY, on_click=copy_to_clipboard)
-
+    copy_btn = ft.IconButton(icon=ft.Icons.CONTENT_COPY, on_click=copy_to_clipboard, visible=False)
+    
     return ft.Container(
         content=ft.Column(
             controls=[
@@ -72,7 +75,8 @@ def cubic_calculator_view(t, current_unit):
                 width_field,
                 length_field,
                 depth_field,
-                ft.Row(controls=[compute_btn, result_text, copy_btn], alignment=ft.MainAxisAlignment.START, spacing=16),
+                ft.Row(controls=[compute_btn], alignment=ft.MainAxisAlignment.START, spacing=16),
+                ft.Row(controls=[result_text, copy_btn], alignment=ft.MainAxisAlignment.START, spacing=16),
             ],
             spacing=12,
         ),

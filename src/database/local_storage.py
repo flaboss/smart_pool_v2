@@ -73,12 +73,13 @@ class LocalStorage:
             print(f"Error saving data: {e}")
     
     @staticmethod
-    def save_auth(user_id: str, email: str):
+    def save_auth(user_id: str, email: str, token: str = None):
         """Save authentication data with current timestamp."""
         data = LocalStorage._load_data()
         data['auth'] = {
             'user_id': user_id,
             'email': email,
+            'token': token,
             'login_timestamp': datetime.now().isoformat()
         }
         LocalStorage._save_data(data)
@@ -109,7 +110,8 @@ class LocalStorage:
             
             return {
                 'user_id': auth.get('user_id'),
-                'email': auth.get('email')
+                'email': auth.get('email'),
+                'token': auth.get('token')
             }
         except (ValueError, KeyError):
             return None
